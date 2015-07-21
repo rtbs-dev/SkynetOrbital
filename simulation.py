@@ -6,46 +6,47 @@ import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 
 class Simulation:
-    R_earth = 6.371e6 # Earth Mean rad, in m
-    g_0 = 9.80665 # earth standard gravity, in m/s**2
-
-    def alt(self,x,y): #altitude above sea level
-        return np.sqrt(x**2+y**2) - self.R_earth
-
-    def lon(self,x,y): # 2D from north pole down, @equator
-        return np.arctan2(y,x)
-
-    def grav(self,x,y):
-        assert alt(x,y) >= 0, 'must be @ or above sea level'
-        h = self.alt(x,y)
-        phi = self.lon(x,y)
-        #print phi
-        g_h = self.g_0*(self.R_earth/(self.R_earth+h))**2
-
-        return np.array([g_h*np.cos(phi), g_h*np.sin(phi)])
-
-    def T_w(self,t,g): #thrust:weight ratio, based on S-IC
-
-            F = 34020000./1.8 #N
-
-            m0 = 130000. #kg
-            mf0 = 2290000. - m0 #kg
-
-            dmf = 80. #kg/s
-
-            m_t = m0 + (mf0-dmf*t)
-
-            if (m_t<=m0) or (t>405):
-                F=0.
-                #print 'Fuel is gone'
-            #print F/(m_t*g)
-            return F/(m_t*g)
 
     G = 6.672e-11 # Gravitational Constant
     #M = 5.97219e24 # Mass of Earth
     M = 5.2915793e22 #Mass of Kerbin
     R = 6e5 #Radius of Kerbin
     #R= 6.378e6 # mean Radius of Earth
+
+    def __init__(self, b):
+        self.mf0 = input('How much fuel (kg) to bring along (can change later)?')
+        print 'setting burn scheme (call change_design() to change)'
+        self.burn = b # a piecewise func determining throttle @ some time t
+
+        self.G = 6.672e-11
+        self.M_k = 5.2915793e22 # Mass of Kerbin
+        self.R_k = 6e5 # Radius of Kerbin
+
+    def change_design(self, mf0, b):
+
+        self.mf0 = mf0 #new init. fuel
+        self.burn = b # a piecewise func determining throttle @ some time t
+
+    def T_w(self,t,g): #thrust:weight ratio, based on S-IC
+
+            F = 189e5 # Thrust of the Engine, in N
+
+            m0 = 13e4 # Weight of empty rocket, in kg
+
+            #mf0 = 229e4 - m0 # Mass of initial fuel, in kg
+            mf0 = self.mf0 #inital fuel
+            #dmf = 80. #kg/s
+            dmf = self.burn(t) #already burned fuel
+
+            m_t = m0 + (mf0-dmf)
+
+            if m_t<=m0: # or (t>405) # 405s only for original case
+                F=0.
+                #print 'Fuel is gone'
+            #print F/(m_t*g)
+            return F/(m_t*g)
+
+
 
     def g(self,y,t):
 
