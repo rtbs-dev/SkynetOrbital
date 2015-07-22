@@ -57,8 +57,6 @@ class Simulation:
 
         assert r_i>=self.R, 'You have crashed'
         g = self.G*self.M/r_i**2
-
-
         f_v = -g*(np.sin(gam_i) - self.T_w(t,g))
         f_gam=(V_i/r_i - g/V_i)*np.cos(gam_i) # + drag/ ortho. term
         f_r = V_i*np.sin(gam_i)
@@ -68,10 +66,10 @@ class Simulation:
         return [f_v, f_gam, f_r, f_phi]
 
     V0= 6.1e2
-    gam0=1.5
+    gam0 = 1.5
     r_0 = R+2.86875e2
     phi0 = -1.5
-    g0=[V0, gam0, r_0, phi0]
+    g0 = [V0, gam0, r_0, phi0]
     t=np.linspace(0,5000,10000)
 
     # TODO: put state, action and design into the problem formulation
