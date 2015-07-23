@@ -7,16 +7,16 @@ from scipy.integrate import odeint
 
 class Simulation:
 
-    G = 6.672e-11 # Gravitational Constant
-    #M = 5.97219e24 # Mass of Earth
-    M = 5.2915793e22 #Mass of Kerbin
-    R = 6e5 #Radius of Kerbin
-    #R= 6.378e6 # mean Radius of Earth
+    G = 6.672e-11  # Gravitational Constant
+    # M = 5.97219e24 # Mass of Earth
+    M = 5.2915793e22  # Mass of Kerbin
+    R = 6e5  # Radius of Kerbin
+    # R= 6.378e6  # mean Radius of Earth
 
     def __init__(self, b):
         self.mf0 = input('How much fuel (kg) to bring along (can change later)?')
         print 'setting burn scheme (call change_design() to change)'
-        self.burn = b # a piecewise func determining throttle @ some time t
+        self.burn = b  # a piecewise func determining throttle @ some time t
 
         self.G = 6.672e-11
         self.M_k = 5.2915793e22 # Mass of Kerbin
@@ -24,14 +24,14 @@ class Simulation:
 
     def change_design(self, mf0, b):
 
-        self.mf0 = mf0 #new init. fuel
-        self.burn = b # a piecewise func determining throttle @ some time t
+        self.mf0 = mf0  #new init. fuel
+        self.burn = b  # a piecewise func determining throttle @ some time t
 
-    def T_w(self,t,g): #thrust:weight ratio, based on S-IC
+    def T_w(self,t,g):  #thrust:weight ratio, based on S-IC
 
-            F = 189e5 # Thrust of the Engine, in N
+            F = 189e5  # Thrust of the Engine, in N
 
-            m0 = 13e4 # Weight of empty rocket, in kg
+            m0 = 13e4  # Weight of empty rocket, in kg
 
             #mf0 = 229e4 - m0 # Mass of initial fuel, in kg
             mf0 = self.mf0 #inital fuel
@@ -40,7 +40,7 @@ class Simulation:
 
             m_t = m0 + (mf0-dmf)
 
-            if m_t<=m0: # or (t>405) # 405s only for original case
+            if m_t<=m0:  # or (t>405) # 405s only for original case
                 F=0.
                 #print 'Fuel is gone'
             #print F/(m_t*g)
