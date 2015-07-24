@@ -1,13 +1,15 @@
 __author__ = 'Thurston Sexton, Max Yi Ren'
-# q-learning implementation
+import qlearning
 
-class QController:
-    def __init__(self):
-        self.trajectory.state = []
-        self.trajectory.action = []
-        self.trajectory.reward = []
+class Controller:
+    def __init__(self, arg):
+        self.control_alg = arg.control_alg
+        if self.control_alg == 'qlearning':
+            self.controller = qlearning.QLearning(arg)
+        else:
+            try_other_method = 1
+        self.controller.learn()
+        self.design = arg.desgin # for pickle
 
-    # main q-learning
-    def learn(self, design, environment):
-
-        return self
+    def optimal_act(self, state, design):
+        return self.controller.e_greedy(state)

@@ -13,20 +13,37 @@ class Simulation:
     R = 6e5  # Radius of Kerbin
     # R= 6.378e6  # mean Radius of Earth
 
-    def __init__(self, b):
-        self.mf0 = input('How much fuel (kg) to bring along (can change later)?')
-        print 'setting burn scheme (call change_design() to change)'
-        self.burn = b  # a piecewise func determining throttle @ some time t
+    def __init__(self, design):
+        # TODO: define state, action spaces and initial state for this particular simulation
+        self.state_space = []
+        self.action_space = []
+        self.initial_state = []
 
+        # design variables
+        self.mf0 = design.mf0
+        self.burn = design.burn
+
+        # self.mf0 = input('How much fuel (kg) to bring along (can change later)?')
+        # print 'setting burn scheme (call change_design() to change)'
+        # self.burn = b  # a piecewise func determining throttle @ some time t
+
+        # design parameters
         self.G = 6.672e-11
         self.M_k = 5.2915793e22 # Mass of Kerbin
         self.R_k = 6e5 # Radius of Kerbin
 
-    def change_design(self, mf0, b):
+    # change design
+    def change_design(self, design):
 
-        self.mf0 = mf0  #new init. fuel
-        self.burn = b  # a piecewise func determining throttle @ some time t
+        self.mf0 = design.mf0  #new init. fuel
+        self.burn = design.b  # a piecewise func determining throttle @ some time t
 
+    # check if should stop
+    # TODO:
+    def running(self):
+        return True
+
+    # TODO: comment all functions
     def T_w(self,t,g):  #thrust:weight ratio, based on S-IC
 
             F = 189e5  # Thrust of the Engine, in N
