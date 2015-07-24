@@ -14,13 +14,13 @@ class Simulation:
 
         # design parameters
         self.G = 6.672e-11
-        self.M = 5.2915793e22 # Mass of Kerbin
+        self.M = 5.2915793e22  # Mass of Kerbin
         # M = 5.97219e24 # Mass of Earth
         self.R = 6e5  # Radius of Kerbin
         # R= 6.378e6  # mean Radius of Earth
         self.F = 189e5  # Thrust of the Engine, in N
         self.m0 = 13e4  # Weight of empty rocket, in kg
-        self.mf = self.design.mf0 # initial fuel mass
+        self.mf = self.design.mf0  # initial fuel mass
         self.V0 = 6.1e2  # initial speed
         self.gam0 = 1.5  # initial angle
         self.r_0 = self.R+2.86875e2  # initial height
@@ -29,8 +29,11 @@ class Simulation:
         self.Isp = 304  # sec ???
 
         # TODO: define state, action spaces and initial state for this particular simulation
-        self.state_space = np.array([[],[],[],[]]) # speed, angle, height, fuel mass
-        self.action_space = np.arange(0)  # burn rate
+        self.state_space = np.array([[0, 11.2e3],
+                                     [-np.pi/2., np.pi/2],
+                                     [self.R, 42.2e6],
+                                     [0., self.design.mf0]])  # speed, angle, height, fuel mass
+        self.action_space = [0, 13e3]  # burn rate
         self.initial_state = np.array([self.V0, self.gam0, self.r_0, self.design.mf0])
         self.current_state = self.initial_state
         self.trajectory = np.empty((0, self.initial_state.size))
