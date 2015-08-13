@@ -33,13 +33,14 @@ class Simulation:
         self.state_space = np.array([[0, 11.2e3],
                                      [-np.pi/2., np.pi/2],
                                      [self.R, 42.2e6],
-                                     [0., self.design.mf0]])  # speed, angle, height, fuel mass
+                                     [0., self.design.mf0],
+                                     [0]])  # speed, gamma, height, fuel mass, phi
         self.action_space = np.array([[0, 13e3]])  # burn rate, needs to be discrete for now
-        self.initial_state = np.array([self.V0, self.gam0, self.r_0, self.design.mf0])
+        self.initial_state = np.array([self.V0, self.gam0, self.r_0, self.design.mf0, 0])
         self.current_state = self.initial_state
+        self.current_altitude = self.current_state[2]
         self.trajectory = np.empty((0, self.initial_state.size))
         self.action = 0
-
 
     # change design
     def change_design(self, design):
@@ -49,10 +50,14 @@ class Simulation:
     # check if should stop
     def running(self, state):
         # if fuel and no crash, continue
-        if state[3] > 0 and state[2] >= self.R:
+        if state[2] >= self.current_altitude:
             return True
         else:
+            # set to initial condition
+            self.current_state = self.initial_state
+            self.current_altitude = self.current_state[2]
             return False
+
 
     # thrust:weight ratio, based on S-IC
     def T_w(self, g):
@@ -75,14 +80,16 @@ class Simulation:
         f_gam=(V_i/r_i - g/V_i)*np.cos(gam_i) # + drag/ ortho. term
         f_r = V_i*np.sin(gam_i)
         f_mf = -self.action
-        # f_phi = (V_i/r_i)*np.cos(gam_i)
+        f_phi = (V_i/r_i)*np.cos(gam_i)
         # return [f_v, f_gam, f_r, f_phi]
-        return f_v, f_gam, f_r, f_mf
+        return f_v, f_gam, f_r, f_mf, f_phi
 
     # simulate one step (self.time_interval)
     def step(self, state, action):
         self.current_state = state
         self.action = action
+        self.current_altitude = state[2]
+
         soln = odeint(self.g, self.current_state, np.linspace(0, self.time_interval, 10))
         self.trajectory = np.concatenate((self.trajectory, soln), axis=0)
         new_state = soln[-1, :]
@@ -93,7 +100,7 @@ class Simulation:
         mf = new_state[3]
         # reward = -(gamma/np.pi)**2 - (mf/self.design.mf0)**2 - (1 - self.G*self.M/r/v**2)**2
 
-        reward = -(gamma/np.pi*2)**2 - (1 - self.G*self.M/r/v**2)**2
+        reward = -1000.0*(gamma/np.pi*2)**2 - (1 - self.G*self.M/r/(v**2))**2
                  # *(1.-mf/self.design.mf0)\
                  # + ((gamma/np.pi*2)**2 < 0.01)*((1 - self.G*self.M/r/v**2)**2 < 0.01)*100
         # if ((gamma/np.pi*2)**2 < 0.01)*((1 - self.G*self.M/r/v**2)**2 < 0.01):
@@ -107,20 +114,24 @@ class Simulation:
             n.plot(np.linspace(1, soln.shape[0], soln.shape[0]), soln[:, i])
         # ax.flatten()[-1].plot(t, soln[:, 2]-self.R)
 
-        # # fig=plt.figure(figsize=(10,10))
-        # ax1 = plt.subplot(111, polar=True)
-        # ax1.plot(soln[:,3], soln[:,2], linewidth=2)
-        # ax1.plot(np.linspace(0,2*np.pi, 10000),self.R*np.ones(10000), linewidth=3)
-        # ax1.fill_betweenx(R*np.ones(10000), np.linspace(0,2*np.pi, 10000), color='g')
-        # ax1.set_ylim(1e4,1e6)
-        #
-        # circle1=plt.Circle((0,0),self.R,color='y')
-        #
-        # x=np.multiply(soln[:,2], np.cos(soln[:, 3]))
-        # y=np.multiply(soln[:,2], np.sin(soln[:, 3]))
-        # plt.plot(x, y)
-        # plt.xlim(0e5,2e5)
-        # plt.ylim(-7.5e5, -5.5e5)
-        # fig = plt.gcf()
-        # fig.set_size_inches(8, 8)
-        # fig.gca().add_artist(circle1)
+        fig1 = plt.figure(figsize=(10,10))
+        ax1 = plt.subplot(111, polar=True)
+        ax1.plot(soln[:,4], soln[:,2], linewidth=2)
+        ax1.plot(np.linspace(0,2*np.pi, 10000),self.R*np.ones(10000), linewidth=3)
+        ax1.fill_betweenx(self.R*np.ones(10000), np.linspace(0,2*np.pi, 10000), color='g')
+        ax1.set_ylim(1e4,1e6)
+
+        circle1 = plt.Circle((0,0),self.R,color='y')
+
+        x = np.multiply(soln[:,2], np.cos(soln[:, 4]))
+        y = np.multiply(soln[:,2], np.sin(soln[:, 4]))
+
+        fig2 = plt.figure(figsize=(10,10))
+        ax2 = plt.subplot(111, polar=False)
+        ax2.plot(x, y)
+        # fig2.xlim(0e5,2e5)
+        # fig2.ylim(-7.5e5, -5.5e5)
+        fig2 = plt.gcf()
+        fig2.set_size_inches(8, 8)
+        fig2.gca().add_artist(circle1)
+        plt.show()

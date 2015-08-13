@@ -11,9 +11,9 @@ class Controller:
             self.controller = directpolicy.DirectPolicySearch(arg)
 
         # check hand-tuned solution
-        # self.controller.obj(13000,500,0,0,0)
-        # self.controller.simulate([13000,500,0,0,0])
-
+        # self.controller.obj(30924.4887,58.2323,36322.4821,49.0338,29128.3738)
+        # self.controller.simulate({'max_params':{'r1':30924.4887,'t1':58.2323,'r2':36322.4821,'t2':49.0338,'r3':29128.3738}})
+        #
         self.controller.learn()
         self.controller.simulate(self.controller.control_parameter.res['max'])
 

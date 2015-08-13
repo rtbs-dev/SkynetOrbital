@@ -29,16 +29,14 @@ class DirectPolicySearch:
     def obj(self, r1, t1, r2, t2, r3):
         par = [r1, t1, r2, t2, r3]
         T = 0  # time counter
-        r = self.current_state[2]  # store current height
-        reward = -100000
+        reward = -1e12
         # if still going up
-        while self.sars.running(self.current_state) and self.current_state[2] >= r:
-            r = self.current_state[2]
+        while self.sars.running(self.current_state):
             action = self.get_action(T, par)
+            if self.current_state[3] <= 0:
+                action = 0.0
             self.current_state, reward = self.sars.step(self.current_state, action)
             T += 1
-
-        self.current_state = self.initial_state
 
         if T == 0:
             stop = 1
@@ -61,12 +59,12 @@ class DirectPolicySearch:
         self.current_state = self.initial_state
         sars_set = []
         T = 0  # time counter
-        r = self.current_state[2]  # store current height
         reward = 0
         # if still going up
-        while self.sars.running(self.current_state) and self.current_state[2] >= r:
-            r = self.current_state[2]
+        while self.sars.running(self.current_state):
             action = self.get_action(T, par)
+            if self.current_state[3] <= 0:
+                action = 0.0
             s, reward = self.sars.step(self.current_state, action)
             sars_set.append(np.concatenate((self.current_state, [action], [reward], s), axis=0))
             self.current_state = s

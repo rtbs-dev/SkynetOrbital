@@ -1,5 +1,8 @@
 __author__ = 'Thurston Sexton, Max Yi Ren'
 # This is the main entrance for SkynetOrbital
+import pickle
+import os.path
+
 import simulation
 import environment
 import control
@@ -33,20 +36,27 @@ def evaluate_design(d, s):
     #        'initial_state': s.initial_state,
     #        'design': d}
     arg = {'control_alg': 'bayesian',
-           'n_iter': 10,
-           'action_space': {'r1': [0, 13e3],
-                            't1': [0,10000],
-                            'r2': [0, 13e3],
-                            't2': [0,10000],
-                            'r3': [0, 13e3]},
+           'n_iter': 100,
+           'action_space': {'r1': [0, 40e3],
+                            't1': [0,100],
+                            'r2': [0, 40e3],
+                            't2': [0,100],
+                            'r3': [0, 40e3]},
            'sars': s,  # this can be the true simulation or the learned model
            'initial_state': s.initial_state,
            'design': d}
     c = control.Controller(arg)
-    wait = 1
+
+    # save controller as a pickle
+    if not os.path.isfile('controller.pickle'):
+        with open('controller.pickle', 'w') as f:
+            pickle.dump(c.controller.control_parameter.res['max'], f)
+            f.close()
+    return c
     # r, t = simulate(d, c, s)
     # return r, t
 
 d = design.Design({'mf0': 2502017*.845})  # kg
 sim = simulation.Simulation(d)
-evaluate_design(design, sim)
+c = evaluate_design(design, sim)
+c.controller.simulate(c.controller.control_parameter.res['max'])
