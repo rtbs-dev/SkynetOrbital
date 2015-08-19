@@ -73,5 +73,6 @@ class DirectPolicySearch:
 
     # main function
     def learn(self):
+        print self.n_iter
         self.control_parameter.maximize(n_iter = self.n_iter)
 
