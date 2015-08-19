@@ -109,9 +109,21 @@ class Simulation:
 
     # TODO: animation?
     def plot(self, soln):
-        fig, ax = plt.subplots(nrows=1, ncols=soln.shape[1], figsize=(12, 4))
+
+        labels = ['Velocity (m/s)',
+                  r'$\gamma$ (rad)',
+                  'Altitude (m)',
+                  'Mass (kg)',
+                  'Longitude (rad)']
+
+        fig, ax = plt.subplots(nrows=1, ncols=soln.shape[1], figsize=(25, 5))
         for i, n in enumerate(ax.flatten()):
             n.plot(np.linspace(1, soln.shape[0], soln.shape[0]), soln[:, i])
+            n.set_title(labels[i])
+            n.set_xlabel('time (s)')
+        ax.flatten()[2].cla()
+        ax.flatten()[2].plot(np.linspace(1, soln.shape[0], soln.shape[0]), soln[:, 2]-self.R)
+        ax.flatten()[2].set_title(labels[2])
         # ax.flatten()[-1].plot(t, soln[:, 2]-self.R)
 
         fig1 = plt.figure(figsize=(10,10))
@@ -119,14 +131,15 @@ class Simulation:
         ax1.plot(soln[:,4], soln[:,2], linewidth=2)
         ax1.plot(np.linspace(0,2*np.pi, 10000),self.R*np.ones(10000), linewidth=3)
         ax1.fill_betweenx(self.R*np.ones(10000), np.linspace(0,2*np.pi, 10000), color='g')
-        ax1.set_ylim(1e4,1e6)
+        ax1.set_ylim(0., 1e6)
+        ax1.set_title('Earth Orbit profile (blue)')
 
         circle1 = plt.Circle((0,0),self.R,color='y')
 
         x = np.multiply(soln[:,2], np.cos(soln[:, 4]))
         y = np.multiply(soln[:,2], np.sin(soln[:, 4]))
 
-        fig2 = plt.figure(figsize=(10,10))
+        fig2 = plt.figure(figsize=(10, 10))
         ax2 = plt.subplot(111, polar=False)
         ax2.plot(x, y)
         # fig2.xlim(0e5,2e5)
