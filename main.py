@@ -36,12 +36,12 @@ def evaluate_design(d, s):
     #        'initial_state': s.initial_state,
     #        'design': d}
     arg = {'control_alg': 'bayesian',
-           'n_iter': 100,
-           'action_space': {'r1': [0, 40e3],
-                            't1': [0,100],
-                            'r2': [0, 40e3],
-                            't2': [0,100],
-                            'r3': [0, 40e3]},
+           'n_iter': 50,
+           'action_space': {'r1': [0, 12.89e3],
+                            't1': [0., 400.],
+                            'r2': [0, 1204.],
+                            't2': [120., 630.],
+                            'r3': [0, 240.]},
            'sars': s,  # this can be the true simulation or the learned model
            'initial_state': s.initial_state,
            'design': d}
@@ -56,7 +56,7 @@ def evaluate_design(d, s):
     # r, t = simulate(d, c, s)
     # return r, t
 
-d = design.Design({'mf0': 2502017*.845})  # kg
+d = design.Design({'mf0': 2.16e6})  # kg
 sim = simulation.Simulation(d)
 c = evaluate_design(design, sim)
 c.controller.simulate(c.controller.control_parameter.res['max'])

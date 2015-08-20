@@ -60,12 +60,63 @@ class Simulation:
 
 
     # thrust:weight ratio, based on S-IC
-    def T_w(self, g):
-            if self.mf > self.action*self.time_interval: # if enough fuel to burn
-                m_t = self.m0 + self.mf
-                return self.action*g*self.Isp/(m_t*g)  # ???
-            else:
-                return 0.
+    # def T_w(self, g):
+    #         if self.mf > self.action*self.time_interval: # if enough fuel to burn
+    #             m_t = self.m0 + self.mf
+    #             return self.action*g*self.Isp/(m_t*g)  # ???
+    #         else:
+    #             return 0.
+
+    def T_w(self, g): #thrust:weight ratio
+
+        #assert mf0<=2.16e6, 'Your tank is overfull (2.16e6kg max)'
+
+        if (self.mf>=456.1e3): # S-IC
+            self.Isp = 263.
+            self.m0 = 130e3
+            self.action_space = np.array([[0, 12.89e3]])
+
+
+        elif (self.mf>=109.5e3): # S-II
+            self.Isp = 360.
+            self.m0 = 40.1e3
+            self.action_space = np.array([[0, 1204.]])
+
+        elif (self.mf>60e3): # S-IVB
+            # note leftover stuff...too much fuel
+            self.Isp = 421.
+            self.m0 = 13.5e3
+            self.action_space = np.array([[0, 240.]])
+
+        else: #out of fuel
+            self.Isp = 0.
+            self.m0 = 13.5e3
+            self.action_space = np.array([[0., 0.]])
+
+        #Isp = 304  # sec
+        v_e = g*self.Isp
+        # dV = 4550  # m/s for kerbin low orbit
+        #F = 18900000. #N
+
+        #m0 = 130000. #kg
+        #mf0 = 2160000 #kg
+        #mf0 = 2502017*1.33# kg tsiolovsky
+        #dmf = 13000.
+
+        F = self.action*v_e
+
+        m_t = self.m0 + self.mf
+            #dmf = 80. #kg/s
+        '''
+        if (m_t<=m0): # or (t>405):
+                F=0.  # no more fuel
+                m_t=m0
+        '''
+        #m_t = m0 + (mf0-dmf*t)
+        #print 'total mass--',m_t
+        #print dmf
+        #print 'T:W ratio--',F/(m_t*g)
+        return [F/(m_t*g), self.action]
 
     # gravity turn
     def g(self, y, t):
@@ -74,12 +125,15 @@ class Simulation:
         r_i = y[2]
         # phi_i = y[3]
 
+
+
         # assert r_i >= self.R, 'You have crashed'
         g = self.G*self.M/r_i**2
-        f_v = -g*(np.sin(gam_i) - self.T_w(g))
-        f_gam=(V_i/r_i - g/V_i)*np.cos(gam_i) # + drag/ ortho. term
+        tw = self.T_w(g)
+        f_v = -g*(np.sin(gam_i) - tw[0])
+        f_gam = (V_i/r_i - g/V_i)*np.cos(gam_i) # + drag/ ortho. term
         f_r = V_i*np.sin(gam_i)
-        f_mf = -self.action
+        f_mf = -tw[1]
         f_phi = (V_i/r_i)*np.cos(gam_i)
         # return [f_v, f_gam, f_r, f_phi]
         return f_v, f_gam, f_r, f_mf, f_phi
@@ -100,7 +154,7 @@ class Simulation:
         mf = new_state[3]
         # reward = -(gamma/np.pi)**2 - (mf/self.design.mf0)**2 - (1 - self.G*self.M/r/v**2)**2
 
-        reward = -1000.0*(gamma/np.pi*2)**2 - (1 - self.G*self.M/r/(v**2))**2
+        reward = -1*(1 - self.G*self.M/r/((v*np.cos(gamma))**2))**2
                  # *(1.-mf/self.design.mf0)\
                  # + ((gamma/np.pi*2)**2 < 0.01)*((1 - self.G*self.M/r/v**2)**2 < 0.01)*100
         # if ((gamma/np.pi*2)**2 < 0.01)*((1 - self.G*self.M/r/v**2)**2 < 0.01):
