@@ -36,11 +36,11 @@ def evaluate_design(d, s):
     #        'initial_state': s.initial_state,
     #        'design': d}
     arg = {'control_alg': 'bayesian',
-           'n_iter': 50,
+           'n_iter': 5,
            'action_space': {'r1': [0, 12.89e3],
                             't1': [0., 400.],
                             'r2': [0, 1204.],
-                            't2': [120., 630.],
+                            't2': [0., 630.],
                             'r3': [0, 240.]},
            'sars': s,  # this can be the true simulation or the learned model
            'initial_state': s.initial_state,

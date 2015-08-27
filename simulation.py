@@ -42,6 +42,14 @@ class Simulation:
         self.trajectory = np.empty((0, self.initial_state.size))
         self.action = 0
 
+    # refresh
+    def refresh(self):
+        self.current_state = self.initial_state
+        self.current_altitude = self.current_state[2]
+        self.trajectory = np.empty((0, self.initial_state.size))
+        self.action = 0
+
+
     # change design
     def change_design(self, design):
         self.design = design

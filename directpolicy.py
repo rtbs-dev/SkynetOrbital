@@ -2,7 +2,8 @@ __author__ = 'Thurston Sexton, Max Yi Ren'
 import numpy as np
 
 from bayesian_optimization.bayesian_optimization import BayesianOptimization
-
+import simulation
+import design
 
 class DirectPolicySearch:
     def __init__(self, arg):
@@ -30,6 +31,9 @@ class DirectPolicySearch:
         par = [r1, t1, r2, t2, r3]
         T = 0  # time counter
         reward = -1e12
+
+        self.sars.refresh()
+
         # if still going up
         while self.sars.running(self.current_state):
             action = self.get_action(T, par)
@@ -58,6 +62,7 @@ class DirectPolicySearch:
 
         self.current_state = self.initial_state
         sars_set = []
+
         T = 0  # time counter
         reward = 0
         # if still going up
